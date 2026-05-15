@@ -1,0 +1,76 @@
+---
+title: "Intermediate_Elective_2"
+author: "Alex Gonzales"
+date: "5/15/26"
+format: 
+ pdf:
+    include-in-header: 
+       text: |
+         \usepackage{fvextra}
+         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+         \DefineVerbatimEnvironment{OutputCode}{Verbatim}{breaklines,commandchars=\\\{\}}
+execute: 
+  message: false
+  warning: false
+---
+
+# 1. Set up
+
+## Packages
+```{r}
+#| label: packages
+
+# general use and cleaning
+library(tidyverse)
+library(here)
+library(janitor)
+library(snakecase)
+library(NatParksPalettes)
+
+# reading .xlxs files
+library(readxl)
+
+# wrap axis labels
+library(scales)
+
+# visualize missing data
+library(naniar)
+
+# arrange plots
+library(patchwork)
+```
+
+
+## Data
+
+```{r}
+#| label: data
+
+# read in vegatation data
+veg <- read_csv(here("data", "veg.csv"))
+
+# vegetation survey metadata
+metadata <- read_csv(here("data", "vp_veg_metadata.csv"))
+
+# taxonomic information
+taxon_list <- read_csv(here("data", "taxon_list.csv"))
+
+aq_ins <- read_xlsx(
+  here("data", "Aquatic Sampling Data-2026-03-10.xlsx"), 
+  sheet = "Aquatic Insects")
+
+
+# site information
+sites <- read_xlsx(
+  here("data", "Aquatic Sampling Data-2026-03-10.xlsx"), 
+  sheet = "sites")
+
+# water quality
+water_quality <- read_xlsx(
+  here("data", "Aquatic Sampling Data-2026-03-10.xlsx"), 
+  sheet = "Water Quality",
+  # powerful argument in read_xlsx to show the missing variables as numbers
+  na = c("", "n/a", "N/A", "over", "173+"))
+
+```
+
