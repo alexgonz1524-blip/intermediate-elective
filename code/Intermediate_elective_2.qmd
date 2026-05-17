@@ -86,7 +86,7 @@ water_quality <- read_xlsx(
 
 ## 1. Explain your inspiration
 
-I chose the "Coal falls. Renewables rise" visualization because I want to compare the percent cover of native plants over non-native plants through time. Therefore my variables are percent cover, and time, with two different line plots: Native and Non-Native cover.
+I chose Cristina Cametti’s “IKEA most popular designers” to represent total percent coverage of each vegetation species across all vernal pools in the year of 2025. The variables shown are the percent cover relative to each species, the species names, and cover types (each percent cover will be its own column)
 
 ```{r}
 #| label: class-code
