@@ -66,6 +66,8 @@ I chose Cristina Cametti’s “IKEA most popular designers” to represent tota
 
 ## 2. PLan your figure
 
+[ViewPDF](Species Cover across Vernal Pools.pdf)
+
 ## 3. Code your figure
 
 ```{r}
