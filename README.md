@@ -32,7 +32,7 @@ library(patchwork)
 ```
 
 ## Rendered output
-The rendered document is here [View PDF](code/Intermediate_Elective_2.pdf).
+The rendered document is here [View PDF](code/Intermediate_elective_2.pdf).
 
 ## Final Figure
 ![Species Cover across Vernal Pools 2025](percentcover.png)
