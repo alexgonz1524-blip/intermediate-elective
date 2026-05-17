@@ -52,10 +52,10 @@ library(patchwork)
 #| label: data
 
 # read in vegatation data
-veg <- read_csv(here("GIT", "Intermediate_Elective_2","data", "veg.csv"))
+veg <- read_csv(here("data", "veg.csv"))
 
 # vegetation survey metadata
-metadata <- read_csv(here("GIT", "Intermediate_Elective_2", "data", "vp_veg_metadata.csv"))
+metadata <- read_csv(here("data", "vp_veg_metadata.csv"))
 ```
 
 # 2. Problems
@@ -207,3 +207,6 @@ ggsave("percentcover.png",
 )
 ```
 
+## 4. Describe your process
+
+Integrating my data into code that I was unfamiliar with was an extremely challenging task, it meant understanding their new code and tweaking my data to fit their parameters. The most challenging thing was altering my data in a way that made sense for the visualization as the figure required a certain amount of variables. Ultimately, this visual needed to tell a story, and I feel that I ended up showing a succinct comparison of what the vernal pools contained in the year 2025 and what types of ground cover they are. This graph is basically a bar graph, only curved for aesthetics.
