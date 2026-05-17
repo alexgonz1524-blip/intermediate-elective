@@ -205,6 +205,8 @@ ggsave("percentcover.png",
   height = 13,
   dpi = 300
 )
+
+figure
 ```
 
 ## 4. Describe your process
