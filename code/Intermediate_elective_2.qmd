@@ -48,41 +48,17 @@ library(patchwork)
 
 ## Data
 
-
 ```{r}
 #| label: data
 
 # read in vegatation data
-veg <- read_csv(here("data", "veg.csv"))
+veg <- read_csv(here("GIT", "Intermediate_Elective_2","data", "veg.csv"))
 
 # vegetation survey metadata
-metadata <- read_csv(here("data", "vp_veg_metadata.csv"))
-
-# taxonomic information
-taxon_list <- read_csv(here("data", "taxon_list.csv"))
-
-aq_ins <- read_xlsx(
-  here("data", "Aquatic Sampling Data-2026-03-10.xlsx"), 
-  sheet = "Aquatic Insects")
-
-
-# site information
-sites <- read_xlsx(
-  here("data", "Aquatic Sampling Data-2026-03-10.xlsx"), 
-  sheet = "sites")
-
-# water quality
-water_quality <- read_xlsx(
-  here("data", "Aquatic Sampling Data-2026-03-10.xlsx"), 
-  sheet = "Water Quality",
-  # powerful argument in read_xlsx to show the missing variables as numbers
-  na = c("", "n/a", "N/A", "over", "173+"))
-
+metadata <- read_csv(here("GIT", "Intermediate_Elective_2", "data", "vp_veg_metadata.csv"))
 ```
 
-
-
-# Problems
+# 2. Problems
 
 ## 1. Explain your inspiration
 
@@ -180,38 +156,9 @@ pal <- brewer.pal(11, "Spectral")
 
 
 ```{r}
-# wrangling
-dt <- total_pool_coverage |> 
-  rename(designer = psoc, category = cover_category) |> 
-  arrange(desc(n)) |>
-  filter(n > 5) |>
-  mutate(n = sqrt(n))
-
-# empty bars
-empty_bar <- 2
-to_add <- matrix(NA, empty_bar, ncol(dt))
-colnames(to_add) <- colnames(dt)
-dt <- rbind(dt, to_add)
-dt$id <- seq(1, nrow(dt))
-
-
-```
-
-```{r}
-#| label: labelling-data
-
-label_data <- dt
-number_of_bar <- nrow(label_data)
-angle <- 90 - 360 * (label_data$id - 0.5) / number_of_bar
-label_data$hjust <- ifelse(angle < -90, 1, 0)
-label_data$angle <- ifelse(angle < -90, angle + 180, angle)
-```
-
-
-```{r}
 #| label: Visualizing-plot
 
-ggplot(dt) +
+figure <- ggplot(dt) +
   geom_bar(aes(x = as.factor(id), y = n, fill = category), stat = "identity") +
   scale_fill_manual(
     values = pal,
@@ -243,5 +190,18 @@ ggplot(dt) +
     size = 3.0,
     angle = label_data$angle,
     inherit.aes = FALSE)
+```
+
+```{r}
+#| label: saving-figure
+
+# save figure as pdf
+
+ggsave("percentcover.png",
+  plot = figure,
+  width = 13,
+  height = 13,
+  dpi = 300
+)
 ```
 
