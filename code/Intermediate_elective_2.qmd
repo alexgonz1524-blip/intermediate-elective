@@ -19,6 +19,10 @@ execute:
 ## Packages
 ```{r}
 #| label: packages
+#| warning: false
+#| message: false      
+#| results: "hide"     
+
 
 # general use and cleaning
 library(tidyverse)
@@ -26,6 +30,7 @@ library(here)
 library(janitor)
 library(snakecase)
 library(NatParksPalettes)
+library(RColorBrewer)
 
 # reading .xlxs files
 library(readxl)
@@ -42,6 +47,7 @@ library(patchwork)
 
 
 ## Data
+
 
 ```{r}
 #| label: data
@@ -72,5 +78,186 @@ water_quality <- read_xlsx(
   # powerful argument in read_xlsx to show the missing variables as numbers
   na = c("", "n/a", "N/A", "over", "173+"))
 
+```
+
+
+
+# Problems
+
+## 1. Explain your inspiration
+
+I chose the "Coal falls. Renewables rise" visualization because I want to compare the percent cover of native plants over non-native plants through time. Therefore my variables are percent cover, and time, with two different line plots: Native and Non-Native cover.
+
+```{r}
+#| label: class-code
+#| message: false
+
+# created a new object from veg
+pools_explicit0_25 <- veg |> 
+  # filtered to only include vernal pool transects
+  filter(str_detect(transect_name, "VP") &
+           site == "ncos") |> 
+  # added new rows to dataframe for missing species and transect distances for each year and pool
+  complete(year, transect_name, psoc, transect_distance,
+           # filled missing percent cover values with 0
+           fill = list(percent_cover = 0)) |> 
+  # grouped by year, pool, species, and cover category
+  group_by(year, transect_name, psoc, cover_category) |> 
+  # summarized by calculating total percent cover across all quadrats
+  summarize(sum_pc = sum(percent_cover, na.rm = TRUE)) |> 
+  # ungrouped the data fram
+  ungroup() |> 
+  # put remove = TRUE to remove year and transect name columns to avoid redundancy
+  # created a column to join with metadata
+  unite("year_pool", year, transect_name, remove = TRUE) |> 
+  # joined metadata data frame
+  left_join(metadata, by = "year_pool") |> 
+  # calculated mean percent cover
+  mutate(mean_pc = sum_pc/num_quad) |> 
+  # only include 2025 data
+  filter(year == "2025")
+
+
+total_pool_coverage <- pools_explicit0_25 %>%
+  group_by(psoc, cover_category) %>%
+  summarize(
+    n = sum(mean_pc, na.rm = TRUE)
+  ) %>%
+  ungroup()
+```
+
+```{r}
+#| label: wrangling-data
+
+dt <- total_pool_coverage |> 
+  rename(designer = psoc,
+    category = cover_category) |> 
+  arrange(desc(n)) |> 
+  filter(n > 5) |> 
+  mutate(n = sqrt(n),
+  designer = factor(designer, levels = designer))
+
+
+dt <- mutate_at(dt, vars(category), as.factor)
+dt <- mutate_at(dt, vars(designer), as.factor)
+glimpse(dt)
+
+```
+
+```{r}
+#| label: prepping-plot
+
+# Start by setting the plot 
+# Set a number of 'empty bar' to add at the end of each group
+empty_bar <- 2
+# Add lines to the initial dataset
+to_add <- matrix(NA, empty_bar, ncol(dt))
+colnames(to_add) <- colnames(dt)
+dt <- rbind(dt, to_add)
+dt$id <- seq(1, nrow(dt))
+
+# Get the name and the y position of each label
+label_data <- dt
+number_of_bar <- nrow(label_data)
+angle <- 90 - 360 * (label_data$id-0.5) /number_of_bar     
+label_data$hjust <- ifelse(angle < -90, 1, 0)
+label_data$angle <- ifelse(angle < -90, angle+180, angle)
+
+# palette
+pal <- brewer.pal(11, "Spectral")
+```
+
+```{r}
+#| label: visualizing-w-plot
+
+ggplot(dt) +
+  geom_bar(aes(x = as.factor(designer), y = n, fill = category), stat = "identity") +
+  scale_fill_manual(
+    values = pal,
+    name = "Category",
+    labels = c("Bare Ground", "Native Cover", "Non-Native Cover", "Other Cover", "Thatch")
+  ) +
+  ylim(-8, 25) +
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = unit(rep(-1, 4), "cm"),
+    legend.text = element_text(size = 9),
+    legend.title = element_text(size = 10)
+  ) +
+  labs(title = "Species Cover across Vernal Pools 2025") +
+  coord_polar(start = 0) +
+  geom_text(data = label_data,
+  aes(x = as.factor(designer),
+      y = max(dt$n, na.rm = TRUE) + 0.3,   # <-- reduced from 1.5
+      label = str_replace_all(designer, "_", " "),  # <-- removes underscores
+      hjust = hjust),
+  color = "black",
+  fontface = "bold",
+  alpha = 0.6,
+  size = 3.0,
+  angle = label_data$angle,
+  inherit.aes = FALSE
+)
+
+```
+
+
+```{r}
+# wrangling
+dt <- total_pool_coverage |> 
+  rename(designer = psoc, category = cover_category) |> 
+  arrange(desc(n)) |>
+  filter(n > 5) |>
+  mutate(n = sqrt(n))
+
+# empty bars
+empty_bar <- 2
+to_add <- matrix(NA, empty_bar, ncol(dt))
+colnames(to_add) <- colnames(dt)
+dt <- rbind(dt, to_add)
+dt$id <- seq(1, nrow(dt))
+
+# label data — use id just like the original
+label_data <- dt
+number_of_bar <- nrow(label_data)
+angle <- 90 - 360 * (label_data$id - 0.5) / number_of_bar
+label_data$hjust <- ifelse(angle < -90, 1, 0)
+label_data$angle <- ifelse(angle < -90, angle + 180, angle)
+
+# plot
+ggplot(dt) +
+  geom_bar(aes(x = as.factor(id), y = n, fill = category), stat = "identity") +
+  scale_fill_manual(
+    values = pal,
+    name = "Category",
+    labels = c("Bare Ground", "Native Cover", "Non-Native Cover", "Other Cover", "Thatch"),
+    na.translate = FALSE
+  ) +
+  ylim(-8, 25) +
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = unit(rep(-1, 4), "cm")
+  ) +
+  labs(title = "Species Cover across Vernal Pools 2025") +
+  coord_polar(start = 0) +
+  geom_text(
+    data = label_data,
+    aes(x = id,
+        y = n + 1,
+        label = str_replace_all(designer, "_", " "),
+        hjust = hjust),
+    color = "black",
+    fontface = "bold",
+    alpha = 0.6,
+    size = 3.0,
+    angle = label_data$angle,
+    inherit.aes = FALSE
+  )
 ```
 
