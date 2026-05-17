@@ -88,6 +88,10 @@ water_quality <- read_xlsx(
 
 I chose Cristina Cametti’s “IKEA most popular designers” to represent total percent coverage of each vegetation species across all vernal pools in the year of 2025. The variables shown are the percent cover relative to each species, the species names, and cover types (each percent cover will be its own column)
 
+## 2. PLan your figure
+
+## 3. Code your figure
+
 ```{r}
 #| label: class-code
 #| message: false
@@ -117,27 +121,35 @@ pools_explicit0_25 <- veg |>
   # only include 2025 data
   filter(year == "2025")
 
-
-total_pool_coverage <- pools_explicit0_25 %>%
-  group_by(psoc, cover_category) %>%
+# created a new object from pools_explicit_25
+total_pool_coverage <- pools_explicit0_25 |> 
+  # grouped by species and cover category
+  group_by(psoc, cover_category) |> 
+  # added mean_pc together across all pools
   summarize(
     n = sum(mean_pc, na.rm = TRUE)
-  ) %>%
+  ) |> 
+  # ungrouped
   ungroup()
 ```
 
 ```{r}
 #| label: wrangling-data
 
+# created new object from total_pool_coverage
 dt <- total_pool_coverage |> 
+  # assigned new names to my data to easily plug into Cametti's data
   rename(designer = psoc,
     category = cover_category) |> 
+  # arranged in descending order
   arrange(desc(n)) |> 
+  # filtered out 0s
   filter(n > 5) |> 
+  # mutated to make the dataset values smaller
   mutate(n = sqrt(n),
   designer = factor(designer, levels = designer))
 
-
+# turning columns into factors
 dt <- mutate_at(dt, vars(category), as.factor)
 dt <- mutate_at(dt, vars(designer), as.factor)
 glimpse(dt)
@@ -147,7 +159,6 @@ glimpse(dt)
 ```{r}
 #| label: prepping-plot
 
-# Start by setting the plot 
 # Set a number of 'empty bar' to add at the end of each group
 empty_bar <- 2
 # Add lines to the initial dataset
@@ -167,43 +178,6 @@ label_data$angle <- ifelse(angle < -90, angle+180, angle)
 pal <- brewer.pal(11, "Spectral")
 ```
 
-```{r}
-#| label: visualizing-w-plot
-
-ggplot(dt) +
-  geom_bar(aes(x = as.factor(designer), y = n, fill = category), stat = "identity") +
-  scale_fill_manual(
-    values = pal,
-    name = "Category",
-    labels = c("Bare Ground", "Native Cover", "Non-Native Cover", "Other Cover", "Thatch")
-  ) +
-  ylim(-8, 25) +
-  theme_minimal() +
-  theme(
-    axis.text = element_blank(),
-    axis.title = element_blank(),
-    panel.grid = element_blank(),
-    plot.margin = unit(rep(-1, 4), "cm"),
-    legend.text = element_text(size = 9),
-    legend.title = element_text(size = 10)
-  ) +
-  labs(title = "Species Cover across Vernal Pools 2025") +
-  coord_polar(start = 0) +
-  geom_text(data = label_data,
-  aes(x = as.factor(designer),
-      y = max(dt$n, na.rm = TRUE) + 0.3,   # <-- reduced from 1.5
-      label = str_replace_all(designer, "_", " "),  # <-- removes underscores
-      hjust = hjust),
-  color = "black",
-  fontface = "bold",
-  alpha = 0.6,
-  size = 3.0,
-  angle = label_data$angle,
-  inherit.aes = FALSE
-)
-
-```
-
 
 ```{r}
 # wrangling
@@ -220,14 +194,23 @@ colnames(to_add) <- colnames(dt)
 dt <- rbind(dt, to_add)
 dt$id <- seq(1, nrow(dt))
 
-# label data — use id just like the original
+
+```
+
+```{r}
+#| label: labelling-data
+
 label_data <- dt
 number_of_bar <- nrow(label_data)
 angle <- 90 - 360 * (label_data$id - 0.5) / number_of_bar
 label_data$hjust <- ifelse(angle < -90, 1, 0)
 label_data$angle <- ifelse(angle < -90, angle + 180, angle)
+```
 
-# plot
+
+```{r}
+#| label: Visualizing-plot
+
 ggplot(dt) +
   geom_bar(aes(x = as.factor(id), y = n, fill = category), stat = "identity") +
   scale_fill_manual(
@@ -249,7 +232,9 @@ ggplot(dt) +
   geom_text(
     data = label_data,
     aes(x = id,
+        # adding labels with 1 space over the column
         y = n + 1,
+        # cleaning labels
         label = str_replace_all(designer, "_", " "),
         hjust = hjust),
     color = "black",
@@ -257,7 +242,6 @@ ggplot(dt) +
     alpha = 0.6,
     size = 3.0,
     angle = label_data$angle,
-    inherit.aes = FALSE
-  )
+    inherit.aes = FALSE)
 ```
 
