@@ -1,39 +1,39 @@
 # Intermediate Elective
-
 ## General information
-
-This repository contains data and code to explore patterns in aquatic invertebrate abundance at North Campus Open Space.
+This repository contains data and code to explore patterns in vegetation 
+cover across vernal pools at North Campus Open Space (NCOS) in 2025.
 
 To work with the code in this repository, you will need the following packages:
-
 ```
 library(tidyverse)
 library(here)
 library(janitor)
 library(snakecase)
-library(scales)
+library(NatParksPalettes)
+library(RColorBrewer)
 library(readxl)
+library(scales)
 library(naniar)
 library(patchwork)
 ```
 
 ## Data and file information
-
 ```
 .
 ├── README.md
 ├── code                                          
-│   ├── week-05_in-class-KEY.pdf                  # key (comes with repo)
-│   └── week-05_in-class-KEY.qmd
+│   ├── Intermediate_Elective_2.pdf        # rendered output
+│   └── Intermediate_Elective_2.qmd        # main analysis and figure code
 ├── data
-│   ├── Aquatic Sampling Data-2026-03-10.xlsx     # invertebrate survey data
-│   └── taxon_list.csv                            # taxonomic information
-└── week-05_spring-2026_aquatic-inverts.Rproj
+│   ├── veg.csv                            # vegetation survey data
+│   └── vp_veg_metadata.csv               # vegetation survey metadata
+└── figures
+    └── percentcover.png                   # final figure output
 ```
 
 ## Rendered output
+The rendered document is here [View PDF](code/Intermediate_Elective_2.pdf).
 
-The rendered key for the code in this repository is here [View PDF](code/week-05_in-class-KEY.pdf).
-
-The rendered document from class is here [ViewPDF](code/in-class-template.pdf).
+## Final Figure
+![Species Cover across Vernal Pools 2025](percentcover.png)
 
