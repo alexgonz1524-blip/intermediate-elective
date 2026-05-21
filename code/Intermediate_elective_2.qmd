@@ -43,6 +43,9 @@ library(naniar)
 
 # arrange plots
 library(patchwork)
+
+# visualizing pdf
+library(knitr)
 ```
 
 
@@ -64,9 +67,17 @@ metadata <- read_csv(here("data", "vp_veg_metadata.csv"))
 
 I chose Cristina Cametti’s “IKEA most popular designers” to represent total percent coverage of each vegetation species across all vernal pools in the year of 2025. The variables shown are the percent cover relative to each species, the species names, and cover types (each percent cover will be its own column)
 
-## 2. PLan your figure
+## 2. Plan your figure
 
-[ViewPDF](Species Cover across Vernal Pools.pdf)
+
+```{r}
+#| label: fig-pdf
+#| fig-cap: "Species Cover Across VP 2025"
+#| out-width: "80%"
+#| fig-align: "center"
+
+knitr::include_graphics("species_cover.png")
+```
 
 ## 3. Code your figure
 
